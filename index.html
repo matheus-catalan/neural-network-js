@@ -5,6 +5,7 @@
   <script src="index.js"></script>
   <script src="Matrix.js"></script>
   <script src="NeuralNetwork.js"></script>
+  <script src="ArtmapFuzzy.js"></script>
   <script src="utils.js"></script>
   <script type="text/javascript" src="dataset/animals.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -21,8 +22,12 @@
   <div class="container">
     <div style="display: flex; justify-content: center; align-items: center;">
 
-      <button id="train" class="bn62">
-        Train network
+      <button id="train_backpropagation" class="bn62">
+        Train network with backpropagation
+      </button>
+
+      <button id="train_artmapfuzzy" class="bn62">
+        Train network with artmap fuzzy
       </button>
       <a href="/dataset.html" target="_blank" class="bn62">Go to dataset</a>
     </div>
@@ -86,12 +91,19 @@
   </div>
 
   <script>
-    let neural_network = new NeuralNetwork(17, 3, 1, 0.1)
 
-    document.getElementById("train").addEventListener("click", () => {
-      neural_network = setup(neural_network)
+    setup();
+
+    document.getElementById("train_backpropagation").addEventListener("click", () => {
+      let neural_network = new NeuralNetwork(17, 3, 1, 0.1)
       train_network()
       document.getElementById("predict_container").style.display = 'flex';
+    });
+
+    document.getElementById("train_artmapfuzzy").addEventListener("click", () => {
+      let artmapfuzzy = new ArtmapFuzzy(17, null, 1, null, 0.1, 0.1, 0.95, 0.1, 0.95)
+      train_network_artmap_fuzzy(true, artmapfuzzy)
+      // document.getElementById("predict_container").style.display = 'flex';
 
     });
   </script>
@@ -99,7 +111,6 @@
     document.getElementById("predict").addEventListener("click", () => {
       let inputs = []
       let options = document.getElementById("inputs-list").children
-      console.log(options[0].children[0].checked)
 
       for (let i = 0; i < options.length; i++) {
         if (options[i].children[0].tagName == 'INPUT') {
@@ -109,8 +120,9 @@
           inputs.push(Number(options[i].children[0].value))
         }
       }
-
-      document.getElementById("is_animal").innerHTML = `The animal is: ${get_animal(neural_network.predict(inputs)[0]).animal_name}`
+      let predict = neural_network.predict(inputs)[0]
+      document.getElementById("is_animal").innerHTML = `The animal is: ${get_animal(predict).animal_name}`
+      calculate_error_output(inputs, predict)
     });
   </script>
 

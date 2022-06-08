@@ -1,16 +1,17 @@
 class Matrix {
-  constructor(rows, cols) {
+  constructor(rows, cols, _data = [], _default_value = 0) {
     this.rows = rows
     this.cols = cols
+    this.data = _data
 
-    this.data = []
-
-    for (let i = 0; i < rows; i++) {
-      let arr = []
-      for (let j = 0; j < cols; j++) {
-        arr.push(0)
+    if (_data.length === 0) {
+      for (let i = 0; i < rows; i++) {
+        let arr = []
+        for (let j = 0; j < cols; j++) {
+          arr.push(_default_value)
+        }
+        this.data.push(arr)
       }
-      this.data.push(arr)
     }
   }
 
@@ -40,6 +41,98 @@ class Matrix {
     })
   }
 
+  categorization(W, choice_parameter) {
+    let major_arr = []
+    let aux = []
+    let t = 0
+
+    this.data.forEach((arr, i) => {
+      arr.forEach((elm, j) => {
+        major_arr = []
+        if (elm <= W[i][j]) {
+          major_arr.push(elm)
+        } else {
+          major_arr.push(W[i][j])
+        }
+        aux[i] = 0
+        major_arr.map((m) => {
+          aux[i] += m
+        })
+
+        aux[i] = aux[i] / (choice_parameter + W[i][j])
+      })
+    })
+
+    aux.forEach((elm, i) => {
+      if (i > aux.length - 1) {
+        return
+      } else if (elm >= aux[i + 1] && t > i) {
+        t = i
+      }
+    })
+
+    return t
+  }
+
+  surveillance_test(W, T, vigilance_parameter) {
+    let smaller_arr = []
+    let x = 0
+    let y = 0
+
+    this.data[T].forEach((elm, j) => {
+      if (elm <= W[T][j]) {
+        smaller_arr.push(elm)
+      } else {
+        smaller_arr.push(W[T][j])
+      }
+    })
+
+    x = smaller_arr.reduce((a, b) => a + b, 0)
+    y = this.data[T].reduce((a, b) => a + b, 0)
+
+    x = x / y
+
+    return x >= vigilance_parameter ? true : false
+  }
+
+  match_tranking(W, T, vigilance_parameter_a_b) {
+    let xab = null
+    let smaller_arr = []
+
+    this.data[T].forEach((elm, j) => {
+      if (elm <= W[T][j]) {
+        smaller_arr.push(elm)
+      } else {
+        smaller_arr.push(W[T][j])
+      }
+    })
+
+    xab = smaller_arr.reduce((a, b) => a + b, 0)
+    let y = this.data[T].reduce((a, b) => a + b, 0)
+    xab = xab / y
+
+    console.log("xab", xab)
+    console.log("vigilance_parameter_a_b", vigilance_parameter_a_b)
+
+    return xab >= vigilance_parameter_a_b ? true : false
+  }
+
+  update_weights(learning_rate, I, T) {
+    let smaller_arr = []
+    this.data[T].forEach((elm, j) => {
+      if (elm <= I[T][j]) {
+        smaller_arr.push(elm)
+      } else {
+        smaller_arr.push(I[T][j])
+      }
+    })
+
+    let x = smaller_arr.map((a) => a * learning_rate)
+    let y = this.data[T].map((a) => (1 - learning_rate) * a)
+
+    this.data[T] = x.map((a, i) => x[i] + y[i])
+  }
+
   static map_matrix(A, func) {
     let matrix = new Matrix(A.rows, A.cols)
 
@@ -53,13 +146,64 @@ class Matrix {
   }
 
   map_matrix(func) {
-    this.data = this.data.map((arr, i) => {
-      return arr.map((num, j) => {
-        return func(num, i, j)
+    if (this.cols > 1) {
+      this.data = this.data.map((arr, i) => {
+        return arr.map((num, j) => {
+          return func(num, i, j)
+        })
       })
+
+      return this
+    }
+
+    this.data = this.data.map((num, i) => {
+      return func(num, i)
     })
 
     return this
+  }
+
+  sum_all() {
+    let sum = 0
+    if (this.cols > 1) {
+      this.data.forEach((arr) => {
+        arr.forEach((num) => {
+          sum += num
+        })
+      })
+
+      return sum
+    }
+
+    this.data.forEach((num) => {
+      sum += num
+    })
+
+    return sum
+  }
+
+  normalize() {
+    let x = this.sum_all()
+    this.map_matrix((num, i, j) => {
+      return num / x
+    })
+  }
+
+  complement(matrix, x) {
+    for (let i = 0; i < this.rows; i++) {
+      if (typeof matrix[i] === "number") {
+        this.data[i][0] = matrix[i] / x
+        this.data[i][1] = matrix[i] - 1 / x
+      } else {
+        for (let j = 0; j < this.cols / 2; j++) {
+          this.data[i][j] = matrix[i][j] / x
+          if (j <= this.cols / 2) {
+            const new_index = j + this.cols / 2
+            this.data[i][new_index] = this.data[i][j] - 1 / x
+          }
+        }
+      }
+    }
   }
 
   static transpose(A) {

@@ -34,6 +34,24 @@ train_network = (train = true) => {
   }
 }
 
+train_network_artmap_fuzzy = (train = true, artmapfuzzy) => {
+  console.log(
+    `---------------------------------- Inicio do treinamento ------------------------------------------------------`
+  )
+  artmapfuzzy.train()
+}
+
+const calculate_error_output = (inputs, index_input_predicat) => {
+  let error = 0
+  const tmp = Math.pow(10, 2)
+  const index = Math.floor(index_input_predicat * tmp) / tmp
+
+  console.log("Entrar predicada pela rede".dataset.inputs[index * 100])
+  console.log("Entradas fornecidas", inputs)
+
+  // for (var i = 0; i < inputs.length; i++) {}
+}
+
 function sigmoid(x) {
   return 1 / (1 + Math.exp(-x))
 }

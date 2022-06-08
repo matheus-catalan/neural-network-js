@@ -17,7 +17,7 @@ class NeuralNetwork {
     this.weigths_output_nodes.randomize()
   }
 
-  train(arr, target) {
+  train_network(arr, target) {
     let input = Matrix.toMatrix(arr)
     let hidden = Matrix.multiply(this.weigths_hidden_nodes, input)
     hidden = Matrix.sum(hidden, this.bias_hidden_nodes)
