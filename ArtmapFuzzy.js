@@ -47,9 +47,6 @@ class ArtmapFuzzy {
   }
 
   train() {
-    let A = this.a
-    let B = this.b
-
     this.ia.complement(this.a.data, this.count_a)
     this.ib.complement(this.b.data, this.count_b)
 
